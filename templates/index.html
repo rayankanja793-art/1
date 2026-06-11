@@ -1,9 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Match Predictor</title>
+</head>
 <body>
-    <video id="video" width="320" height="240" autoplay></video>
+    <h1>Live Match Analysis</h1>
+    <video id="video" width="640" height="480" autoplay playsinline></video>
+    <p>Status: <span id="prediction">Waiting for camera...</span></p>
+
     <script>
-        // JS here would capture the frame every 1s and fetch('/predict', {method:'POST', body: ...})
+        const video = document.getElementById('video');
+        const predictionText = document.getElementById('prediction');
+
+        // Access Camera
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+            .then(stream => { video.srcObject = stream; });
+
+        // Send frame every 1000ms
+        setInterval(async () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext("2d").drawImage(video, 0, 0);
+
+            canvas.toBlob(async (blob) => {
+                const formData = new FormData();
+                formData.append("image", blob);
+
+                const response = await fetch("/predict", {
+                    method: "POST",
+                    body: formData
+                });
+                const data = await response.json();
+                predictionText.innerText = "Players detected: " + data.player_count;
+            }, "image/jpeg");
+        }, 1000);
     </script>
 </body>
 </html>
