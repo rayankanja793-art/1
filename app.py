@@ -26,3 +26,16 @@ def predict():
 
 if __name__ == '__main__':
     app.run()
+from teams import SERIE_A_TEAMS
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    home_team_name = request.form.get('home_team')
+    away_team_name = request.form.get('away_team')
+    
+    # Access team data
+    home_data = SERIE_A_TEAMS.get(home_team_name)
+    
+    # Now your AI logic can use 'home_data["color_profile"]' 
+    # to look for specific jersey colors on the screen!
+    # ...
