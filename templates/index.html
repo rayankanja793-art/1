@@ -1,23 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>AI Match Predictor</title>
-</head>
+<html>
+<head><title>Match Predictor</title></head>
 <body>
     <h1>Live Match Analysis</h1>
     <video id="video" width="640" height="480" autoplay playsinline></video>
-    <p>Status: <span id="prediction">Waiting for camera...</span></p>
+    <p>Status: <span id="prediction">Initializing...</span></p>
 
     <script>
         const video = document.getElementById('video');
         const predictionText = document.getElementById('prediction');
 
-        // Access Camera
         navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
             .then(stream => { video.srcObject = stream; });
 
-        // Send frame every 1000ms
         setInterval(async () => {
             const canvas = document.createElement("canvas");
             canvas.width = video.videoWidth;
@@ -26,21 +21,20 @@
 
             canvas.toBlob(async (blob) => {
                 const formData = new FormData();
-                formData.append("image", blob);
+                formData.append("image", blob); // MUST MATCH request.files['image']
 
-                const response = await fetch("/predict", {
-                    method: "POST",
-                    body: formData
-                });
-                const data = await response.json();
-                predictionText.innerText = "Players detected: " + data.player_count;
+                try {
+                    const response = await fetch("/predict", {
+                        method: "POST",
+                        body: formData
+                    });
+                    const data = await response.json();
+                    predictionText.innerText = "Players detected: " + (data.player_count || 0);
+                } catch (err) {
+                    console.error("Upload failed", err);
+                }
             }, "image/jpeg");
-        }, 1000);
+        }, 1500); // 1.5 seconds to reduce load
     </script>
 </body>
 </html>
-<select id="homeTeam">
-    {% for team in teams %}
-        <option value="{{ team }}">{{ team|replace('_', ' ').upper() }}</option>
-    {% endfor %}
-</select>
