@@ -39,3 +39,8 @@
     </script>
 </body>
 </html>
+<select id="homeTeam">
+    {% for team in teams %}
+        <option value="{{ team }}">{{ team|replace('_', ' ').upper() }}</option>
+    {% endfor %}
+</select>
